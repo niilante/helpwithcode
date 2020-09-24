@@ -2,12 +2,12 @@
    include_once 'db/connect_db.php';
    session_start();
    if($_SESSION['username']==""){
-     include_once 'inc/404.php';
+     include_once'inc/404.php';
    }else{
      if($_SESSION['role']=="Admin"){
-       include_once 'inc/header_all.php';
+       include_once'inc/header_all.php';
      }else{
-         include_once 'inc/header_all_operator.php';
+         include_once'inc/header_all_operator.php';
      }
    }
 
@@ -29,24 +29,8 @@
       return $output;
     }
 
-//Function to display records from the database in a dropdown list
-      function fill_barber($pdo){
-      $barberlist = '';
-
-      $select = $pdo->prepare("SELECT username FROM tbl_user");
-      $select->execute();
-      $result = $select->fetchAll();
-
-      foreach($result as $row){
-        $barberlist.='<option>'.$row['username'].'</option>';
-      }
-      return $barberlist;
-    }
-  
-    $username = '';
     if(isset($_POST['save_order'])){
       $cashier_name = $_POST['cashier_name'];
-      $username = $_POST['username'];
       $order_date = date("Y-m-d",strtotime($_POST['orderdate']));
       $order_time = date("H:i", strtotime($_POST['timeorder']));
       $total = $_POST['total'];
@@ -74,11 +58,10 @@
       }else{
 
 
-        $insert = $pdo->prepare("INSERT INTO tbl_invoice(cashier_name, username, order_date, time_order, total, paid, due)
-        values(:name, :username, :orderdate, :timeorder, :total, :paid, :due)");
+        $insert = $pdo->prepare("INSERT INTO tbl_invoice(cashier_name, order_date, time_order, total, paid, due)
+        values(:name, :orderdate, :timeorder, :total, :paid, :due)");
 
         $insert->bindParam(':name', $cashier_name);
-        $insert->bindParam(':username', $username);
         $insert->bindParam(':orderdate',  $order_date);
         $insert->bindParam(':timeorder',  $order_time);
         $insert->bindParam(':total', $total);
@@ -144,13 +127,11 @@
 
     <!-- Main content -->
     <section class="content container-fluid">
-
         <div class="box box-success">
           <form action="" method="POST">
-
             <div class="box-body">
               <div class="col-md-3">
-                <div class="form-group" style="margin-top:10px;">
+                <div class="form-group">
                   <label>Sales Person</label>
                   <div class="input-group">
                     <div class="input-group-addon">
@@ -161,7 +142,6 @@
                   <!-- /.input group -->
                 </div>
               </div>
-
             <div class="box-body">
               <div class="col-md-3">
                 <div class="form-group">
@@ -170,18 +150,11 @@
                     <div class="input-group-addon">
                       <i class="fa fa-user"></i>
                     </div>
-                    <div>
-                    <select class="form-control pull-right" name="username" value="<?php echo $username;?>">
-                      <?php
-                      echo fill_barber($pdo);
-                      ?>
-                    </select>
-                    </div>
+                    <input type="text" class="form-control pull-right" name="cashier_name" value="<?php echo $_SESSION['username']; ?>" readonly>
                   </div>
                   <!-- /.input group -->
                 </div>
               </div>
-
               <div class="col-md-3">
                 <div class="form-group">
                   <label>Transaction date</label>
@@ -219,7 +192,7 @@
                           <th>Name</th>
                           <th>Stock</th>
                           <th>Price</th>
-                          <th>Quantity</th> <!--Changed from Number of Persons to Quantity-->
+                          <th>Number of Persons</th>
                           <th>Unit</th>
                           <th>Total</th>
                           <th>
@@ -272,7 +245,7 @@
             </div>
 
             <div class="box-footer" align="center">
-              <input type="submit" name="save_order" value="Save Transaction" class="btn btn-success">
+              <input type="submit" id="saveOrder" name="save_order" value="Save Transaction" class="btn btn-success">
               <a href="order.php" class="btn btn-warning">Back</a>
             </div>
           </form>
@@ -303,15 +276,15 @@
       $(document).on('click','.btn_addOrder', function(){
         var html='';
         html+='<tr>';
-        html+='<td><input type="hidden" class="form-control productcode" name="productcode[]" readonly></td>';
-        html+='<td><select class="form-control productid" name="productid[]" style="width:15  0px;" required><option value="">--Select Product--</option><?php
+        html+='<td><input type="hidden" id="productcode" class="form-control productcode" name="productcode[]" readonly></td>';
+        html+='<td><select class="form-control productid" id="productid" name="productid[]" style="width:100px;" required><option value="">--Select Product--</option><?php
         echo fill_product($pdo)?></select></td>';
-        html+='<td><input type="text" class="form-control productname" style="width:200px;" name="productname[]" readonly></td>';
-        html+='<td><input type="text" class="form-control productstock" style="width:50px;" name="productstock[]" readonly></td>';
-        html+='<td><input type="text" class="form-control productprice" style="width:100px;" name="productprice[]" readonly></td>';
-        html+='<td><input type="number" min="1" max="50" class="form-control quantity_product" style="width:100px;" name="quantity[]" required></td>';
-        html+='<td><input type="text" class="form-control productsatuan" style="width:100px;" name="productsatuan[]" readonly></td>';
-        html+='<td><input type="text" class="form-control producttotal" style="width:150px;" name="producttotal[]" readonly></td>';
+        html+='<td><input type="text" class="form-control productname" id="productname" style="width:200px;" name="productname[]" readonly></td>';
+        html+='<td><input type="text" class="form-control productstock" id="productstock" style="width:50px;" name="productstock[]" readonly></td>';
+        html+='<td><input type="text" class="form-control productprice" id="productprice" style="width:100px;" name="productprice[]" readonly></td>';
+        html+='<td><input type="number" min="1" max="50" id="productquantity" class="form-control quantity_product" style="width:100px;" name="quantity[]" required></td>';
+        html+='<td><input type="text" class="form-control productsatuan" id="productsatuan" style="width:100px;" name="productsatuan[]" readonly></td>';
+        html+='<td><input type="text" class="form-control producttotal" id="producttotal" style="width:150px;" name="producttotal[]" readonly></td>';
         html+='<td><button type="button" name="remove" class="btn btn-danger btn-sm btn-remove"><i class="fa fa-remove"></i></button></td>'
 
         $('#myOrder').append(html);
@@ -334,10 +307,43 @@
               tr.find(".producttotal").val(tr.find(".quantity_product").val() * tr.find(".productprice").val());
               calculate(0,0);
             }
-          });
-        });
+          })
+        })
 
-      })
+      });
+
+      $('#saveOrder').click(function(){
+        productid = $("#productid").val()
+        productcode = $("#productcode").val()
+        productname = $("#productname").val()
+        productstock = $("#productstock").val()
+        productsatuan = $("#productsatuan").val()
+        productprice = $("#productprice").val()
+        productquantity = $("#productquantity").val()
+        producttotal = $("#producttotal").val()
+
+
+        $.ajax({
+          url: 'insert.php',
+          method: 'POST',
+          data:{
+            productid: productid,
+            productcode: productcode,
+            productname: productname,
+            productstock: productstock,
+            productsatuan: productsatuan,
+            productprice: productprice,
+            productquantity: productquantity,
+            producttotal: producttotal,
+
+          },
+          success:function(data){
+            alert(data)
+          }
+        })
+        
+      });
+
 
       $(document).on('click','.btn-remove', function(){
         $(this).closest('tr').remove();
@@ -384,5 +390,5 @@
 
 
  <?php
-    include_once 'inc/footer_all.php';
+    include_once'inc/footer_all.php';
  ?>
